@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помидорный бомбардировщик</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-section {
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-label:hover {
+            background: #ff3742;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border: 3px dashed #ff4757;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
+        }
+
+        #target-image {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tomato {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff4757, #c23616);
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(194, 54, 22, 0.7);
+        }
+
+        .splat {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255,71,87,0.8) 0%, rgba(194,54,22,0.4) 70%, transparent 100%);
+            border-radius: 50%;
+            z-index: 3;
+            pointer-events: none;
+            transform: scale(0);
+            animation: splat-animation 0.5s forwards;
+        }
+
+        @keyframes splat-animation {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff4757;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #26c463;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        #reset-btn {
+            background: #5352ed;
+        }
+
+        #reset-btn:hover {
+            background: #4241d4;
+        }
+
+        .instructions {
+            margin-top: 25px;
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .game-area {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🍅 Помидорный бомбардировщик 🍅</h1>
+        <p class="subtitle">Загрузи фото и кидай в него помидоры!</p>
+    </header>
+
+    <div class="container">
+        <div class="upload-section">
+            <label for="file-input" class="upload-label">
+                📁 Выбери фото для помидорной атаки
+            </label>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <div class="game-area" id="game-area">
+            <p id="placeholder-text" style="text-align: center; margin-top: 220px; color: #888; font-size: 1.2rem;">
+                Загрузи фото, чтобы начать бомбардировку
+            </p>
+            <img id="target-image" style="display: none;">
+        </div>
+
+        <div class="controls">
+            <div class="score">Попадания: <span id="hit-count">0</span></div>
+            <button id="reset-btn">Сбросить фото</button>
+            <button id="clear-btn">Очистить попадания</button>
+        </div>
+
+        <div class="instructions">
+            <p>💡 <strong>Как играть:</strong> Загрузи фото, затем кликай по нему, чтобы бросить помидор!</p>
+            <p>🎯 <strong>Цель:</strong> Попасть как можно больше раз в цель!</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 Помидорный бомбардировщик | Сделано с ❤️ и 🍅</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file-input');
+            const targetImage = document.getElementById('target-image');
+            const gameArea = document.getElementById('game-area');
+            const placeholderText = document.getElementById('placeholder-text');
+            const hitCountElement = document.getElementById('hit-count');
+            const resetBtn = document.getElementById('reset-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            
+            let hitCount = 0;
+            
+            // Обработчик загрузки изображения
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        targetImage.src = event.target.result;
+                        targetImage.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Обработчик клика по игровой области для броска помидора
+            gameArea.addEventListener('click', function(e) {
+                // Проверяем, что изображение загружено и клик был по нему
+                if (targetImage.style.display === 'block' && e.target === targetImage) {
+                    throwTomato(e.offsetX, e.offsetY);
+                    hitCount++;
+                    hitCountElement.textContent = hitCount;
+                }
+            });
+            
+            // Функция броска помидора
+            function throwTomato(x, y) {
+                // Создаем элемент помидора
+                const tomato = document.createElement('div');
+                tomato.className = 'tomato';
+                
+                // Начальная позиция (случайная в верхней части)
+                const startX = Math.random() * (gameArea.offsetWidth - 40);
+                const startY = -40;
+                
+                tomato.style.left = startX + 'px';
+                tomato.style.top = startY + 'px';
+                
+                gameArea.appendChild(tomato);
+                
+                // Анимация полета помидора
+                const animation = tomato.animate([
+                    { transform: `translate(0, 0)` },
+                    { transform: `translate(${x - startX}px, ${y - startY}px)` }
+                ], {
+                    duration: 800,
+                    easing: 'cubic-bezier(0.42, 0, 0.58, 1)'
+                });
+                
+                // После завершения анимации создаем эффект попадания
+                animation.onfinish = function() {
+                    tomato.remove();
+                    
+                    // Создаем эффект брызг
+                    const splat = document.createElement('div');
+                    splat.className = 'splat';
+                    splat.style.left = (x - 30) + 'px';
+                    splat.style.top = (y - 30) + 'px';
+                    
+                    gameArea.appendChild(splat);
+                    
+                    // Удаляем эффект брызг через некоторое время
+                    setTimeout(() => {
+                        splat.remove();
+                    }, 2000);
+                };
+            }
+            
+            // Сброс изображения
+            resetBtn.addEventListener('click', function() {
+                targetImage.style.display = 'none';
+                targetImage.src = '';
+                placeholderText.style.display = 'block';
+                fileInput.value = '';
+                
+                // Удаляем все помидоры и брызги
+                document.querySelectorAll('.tomato, .splat').forEach(el => el.remove());
+                
+                // Сброс счетчика
+                hitCount = 0;
+                hitCountElement.textContent = hitCount;
+            });
+            
+            // Очистка попаданий
+            clearBtn.addEventListener('click', function() {
+                // Удаляем все помидоры и брызги
+                document.querySelectorAll('.tomato, .splat').forEach(el => el.remove());
+                
+                // Сброс счетчика
+                hitCount = 0;
+                hitCountElement.textContent = hitCount;
+            });
+        });
+    </script>
+</body>
+</html>
