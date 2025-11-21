@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помидорный Тир | Бросай помидоры в цели!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #ff5e62;
+            --secondary: #ff9966;
+            --accent: #36D1DC;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #f8f9fa;
+            --success: #4CAF50;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            min-height: 100vh;
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        header {
+            background: rgba(26, 26, 46, 0.9);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            animation: bounce 2s infinite;
+        }
+        
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover, nav a.active {
+            background: rgba(255, 94, 98, 0.2);
+            color: var(--secondary);
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: #ccc;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(255, 94, 98, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 94, 98, 0.6);
+        }
+        
+        /* Game Section */
+        .game-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--secondary);
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        #target {
+            position: absolute;
+            width: 300px;
+            height: 400px;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d2d4e;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            border: 3px solid var(--accent);
+        }
+        
+        #target:hover {
+            transform: translateX(-50%) scale(1.02);
+        }
+        
+        #target img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 5px;
+        }
+        
+        .tomato {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 30% 30%, #ff5e62, #b21f1f);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .splat {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(178,31,31,0.8) 0%, rgba(178,31,31,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            transform: scale(0);
+            animation: splat 0.5s forwards;
+        }
+        
+        @keyframes splat {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        button {
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #throwBtn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+        }
+        
+        #autoThrowBtn {
+            background: linear-gradient(to right, #8E2DE2, #4A00E0);
+            color: white;
+        }
+        
+        #resetBtn {
+            background: linear-gradient(to right, var(--accent), #5B86E5);
+            color: white;
+        }
+        
+        #changeTargetBtn {
+            background: linear-gradient(to right, #f46b45, #eea849);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(255, 153, 102, 0.5);
+        }
+        
+        /* Power Controls */
+        .power-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .power-bar {
+            width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .power-level {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(to right, var(--success), #8BC34A);
+            border-radius: 10px;
+            transition: width 0.3s;
+            position: relative;
+        }
+        
+        .power-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Targets Gallery */
+        .targets-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .target-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .target-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .target-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .target-name {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* Footer */
+        footer {
+            background: rgba(15, 15, 26, 0.9);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: var(--light);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            color: var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: confetti-fall 5s linear forwards;
+            z-index: 100;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(1000px) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .game-container {
+                height: 400px;
+            }
+            
+            #target {
+                width: 250px;
+                height: 300px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🍅</div>
+            <div class="logo-text">Помидорный Тир</div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="active">Игра</a></li>
+                <li><a href="#">Цели</a></li>
+                <li><a href="#">Рейтинг</a></li>
+                <li><a href="#">О нас</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Бросай помидоры в цель!</h1>
+            <p>Почувствуй себя участником настоящего помидорного баттла! Целься, бросай и попадай в мишени с максимальной точностью.</p>
+            <a href="#game" class="cta-button">Начать игру <i class="fas fa-play"></i></a>
+        </section>
+
+        <!-- Game Section -->
+        <section class="game-section" id="game">
+            <h2 class="section-title">Помидорный Тир</h2>
+            
+            <div class="game-container" id="gameContainer">
+                <div id="target">
+                    <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Цель для попадания" id="targetImage">
+                </div>
+            </div>
+            
+            <div class="power-controls">
+                <span>Сила броска:</span>
+                <div class="power-bar">
+                    <div class="power-level" id="powerLevel"></div>
+                </div>
+                <button id="increasePower"><i class="fas fa-plus"></i></button>
+                <button id="decreasePower"><i class="fas fa-minus"></i></button>
+            </div>
+            
+            <div class="controls">
+                <button id="throwBtn"><i class="fas fa-bullseye"></i> Бросить помидор!</button>
+                <button id="autoThrowBtn"><i class="fas fa-bolt"></i> Авто-бросок (10 раз)</button>
+                <button id="resetBtn"><i class="fas fa-broom"></i> Очистить поле</button>
+                <button id="changeTargetBtn"><i class="fas fa-sync-alt"></i> Сменить цель</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="thrownCount">0</div>
+                    <div>Брошено помидоров</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="hitCount">0</div>
+                    <div>Попаданий в цель</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div>Точность бросков</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Targets Gallery -->
+        <section class="game-section">
+            <h2 class="section-title">Выбери свою цель</h2>
+            <div class="targets-gallery" id="targetsGallery">
+                <!-- Targets will be loaded by JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                &copy; 2023 Помидорный Тир. Все права защищены.
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-vk"></i></a>
+                <a href="#"><i class="fab fa-telegram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game elements
+            const gameContainer = document.getElementById('gameContainer');
+            const target = document.getElementById('target');
+            const targetImage = document.getElementById('targetImage');
+            const throwBtn = document.getElementById('throwBtn');
+            const autoThrowBtn = document.getElementById('autoThrowBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const changeTargetBtn = document.getElementById('changeTargetBtn');
+            const increasePowerBtn = document.getElementById('increasePower');
+            const decreasePowerBtn = document.getElementById('decreasePower');
+            const powerLevel = document.getElementById('powerLevel');
+            const thrownCountEl = document.getElementById('thrownCount');
+            const hitCountEl = document.getElementById('hitCount');
+            const accuracyEl = document.getElementById('accuracy');
+            const targetsGallery = document.getElementById('targetsGallery');
+            
+            // Game state
+            let thrownCount = 0;
+            let hitCount = 0;
+            let power = 50;
+            let isAutoThrowing = false;
+            
+            // Available targets
+            const targets = [
+                {
+                    id: 1,
+                    name: "Смайлик",
+                    image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                },
+                {
+                    id: 2,
+                    name: "Знак вопроса",
+                    image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                },
+                {
+                    id: 3,
+                    name: "Логотип",
+                    image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                },
+                {
+                    id: 4,
+                    name: "Геометрическая фигура",
+                    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                },
+                {
+                    id: 5,
+                    name: "Абстракция",
+                    image: "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                },
+                {
+                    id: 6,
+                    name: "Узор",
+                    image: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                }
+            ];
+            
+            let currentTargetIndex = 0;
+            
+            // Initialize targets gallery
+            function initTargetsGallery() {
+                targetsGallery.innerHTML = '';
+                
+                targets.forEach((target, index) => {
+                    const targetElement = document.createElement('div');
+                    targetElement.className = 'target-item';
+                    targetElement.innerHTML = `
+                        <img src="${target.image}" alt="${target.name}">
+                        <div class="target-name">${target.name}</div>
+                    `;
+                    
+                    targetElement.addEventListener('click', () => {
+                        selectTarget(index);
+                    });
+                    
+                    targetsGallery.appendChild(targetElement);
+                });
+            }
+            
+            // Select target
+            function selectTarget(index) {
+                currentTargetIndex = index;
+                targetImage.src = targets[index].image;
+                
+                // Animation
+                target.animate([
+                    { opacity: 1 },
+                    { opacity: 0 },
+                    { opacity: 1 }
+                ], {
+                    duration: 500,
+                    easing: 'ease-in-out'
+                });
+            }
+            
+            // Update power display
+            function updatePowerDisplay() {
+                powerLevel.style.width = `${power}%`;
+                
+                // Change color based on power
+                if (power < 30) {
+                    powerLevel.style.background = 'linear-gradient(to right, #4CAF50, #8BC34A)';
+                } else if (power < 70) {
+                    powerLevel.style.background = 'linear-gradient(to right, #FF9800, #FFC107)';
+                } else {
+                    powerLevel.style.background = 'linear-gradient(to right, #F44336, #E91E63)';
+                }
+            }
+            
+            // Throw tomato
+            function throwTomato() {
+                if (isAutoThrowing) return;
+                
+                thrownCount++;
+                updateStats();
+                
+                // Create tomato element
+                const tomato = document.createElement('div');
+                tomato.className = 'tomato';
+                
+                // Starting position - bottom of the screen
+                const startX = Math.random() * (gameContainer.offsetWidth - 40);
+                tomato.style.left = `${startX}px`;
+                tomato.style.bottom = '0px';
+                
+                gameContainer.appendChild(tomato);
+                
+                // Animation
+                const targetRect = target.getBoundingClientRect();
+                const containerRect = gameContainer.getBoundingClientRect();
+                
+                const targetX = targetRect.left - containerRect.left + targetRect.width / 2;
+                const targetY = targetRect.top - containerRect.top + targetRect.height / 2;
+                
+                // Add randomness based on power
+                const randomness = (100 - power) / 10;
+                const finalX = targetX + (Math.random() - 0.5) * randomness * 20;
+                const finalY = targetY + (Math.random() - 0.5) * randomness * 10;
+                
+                // Flight time depends on power
+                const flightTime = 1000 - (power * 8);
+                
+                // Tomato flight animation
+                tomato.animate([
+                    { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate(${finalX - startX}px, -${finalY}px) rotate(360deg)`, opacity: 1 }
+                ], {
+                    duration: flightTime,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                });
+                
+                // Check for hit
+                setTimeout(() => {
+                    const tomatoRect = tomato.getBoundingClientRect();
+                    const targetRect = target.getBoundingClientRect();
+                    
+                    // Collision detection
+                    const isHit = !(
+                        tomatoRect.right < targetRect.left ||
+                        tomatoRect.left > targetRect.right ||
+                        tomatoRect.bottom < targetRect.top ||
+                        tomatoRect.top > targetRect.bottom
+                    );
+                    
+                    if (isHit) {
+                        hitCount++;
+                        updateStats();
+                        
+                        // Create splat effect
+                        createSplat(finalX, finalY);
+                        
+                        // Target hit animation
+                        target.animate([
+                            { transform: 'translateX(-50%) scale(1)' },
+                            { transform: 'translateX(-50%) scale(1.1)' },
+                            { transform: 'translateX(-50%) scale(1)' }
+                        ], {
+                            duration: 300,
+                            easing: 'ease-out'
+                        });
+                        
+                        // Create confetti on every 5th hit
+                        if (hitCount % 5 === 0) {
+                            createConfetti();
+                        }
+                    }
+                    
+                    // Remove tomato after a while
+                    setTimeout(() => {
+                        tomato.remove();
+                    }, 1000);
+                    
+                }, flightTime);
+            }
+            
+            // Create splat effect
+            function createSplat(x, y) {
+                const splat = document.createElement('div');
+                splat.className = 'splat';
+                splat.style.left = `${x - 30}px`;
+                splat.style.top = `${y - 30}px`;
+                
+                gameContainer.appendChild(splat);
+                
+                // Remove splat after a while
+                setTimeout(() => {
+                    splat.remove();
+                }, 2000);
+            }
+            
+            // Create confetti
+            function createConfetti() {
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.width = `${Math.random() * 10 + 5}px`;
+                    confetti.style.height = `${Math.random() * 10 + 5}px`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+            }
+            
+            // Auto throw multiple tomatoes
+            function autoThrow() {
+                if (isAutoThrowing) return;
+                
+                isAutoThrowing = true;
+                autoThrowBtn.disabled = true;
+                autoThrowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Бросаем...';
+                
+                let throwsLeft = 10;
+                
+                const interval = setInterval(() => {
+                    throwTomato();
+                    throwsLeft--;
+                    
+                    if (throwsLeft <= 0) {
+                        clearInterval(interval);
+                        isAutoThrowing = false;
+                        autoThrowBtn.disabled = false;
+                        autoThrowBtn.innerHTML = '<i class="fas fa-bolt"></i> Авто-бросок (10 раз)';
+                    }
+                }, 300);
+            }
+            
+            // Reset game
+            function resetGame() {
+                const tomatoes = document.querySelectorAll('.tomato, .splat');
+                tomatoes.forEach(tomato => tomato.remove());
+                
+                thrownCount = 0;
+                hitCount = 0;
+                updateStats();
+            }
+            
+            // Change target
+            function changeTarget() {
+                currentTargetIndex = (currentTargetIndex + 1) % targets.length;
+                selectTarget(currentTargetIndex);
+            }
+            
+            // Update stats
+            function updateStats() {
+                thrownCountEl.textContent = thrownCount;
+                hitCountEl.textContent = hitCount;
+                
+                const accuracy = thrownCount > 0 ? Math.round((hitCount / thrownCount) * 100) : 0;
+                accuracyEl.textContent = `${accuracy}%`;
+            }
+            
+            // Event listeners
+            throwBtn.addEventListener('click', throwTomato);
+            autoThrowBtn.addEventListener('click', autoThrow);
+            resetBtn.addEventListener('click', resetGame);
+            changeTargetBtn.addEventListener('click', changeTarget);
+            
+            increasePowerBtn.addEventListener('click', () => {
+                if (power < 100) {
+                    power += 10;
+                    updatePowerDisplay();
+                }
+            });
+            
+            decreasePowerBtn.addEventListener('click', () => {
+                if (power > 10) {
+                    power -= 10;
+                    updatePowerDisplay();
+                }
+            });
+            
+            // Allow throwing tomatoes by clicking on the game container
+            gameContainer.addEventListener('click', (e) => {
+                if (e.target === gameContainer) {
+                    throwTomato();
+                }
+            });
+            
+            // Initialize
+            initTargetsGallery();
+            updatePowerDisplay();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
